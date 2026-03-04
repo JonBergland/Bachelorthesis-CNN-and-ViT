@@ -1,5 +1,5 @@
 import os
-from CNN import CNN
+from CNN import ResnetTrainer
 
 def main(dataset_root: str, 
          epochs: int = 5,
@@ -11,7 +11,7 @@ def main(dataset_root: str,
          save_path: str | None = None,
          only_see_metrics: bool = False):
 
-    cnn = CNN(dataset_root=dataset_root, 
+    cnn = ResnetTrainer(dataset_root=dataset_root, 
     epochs = epochs,
     lr_rate = lr_rate,
     momentum = momentum,
