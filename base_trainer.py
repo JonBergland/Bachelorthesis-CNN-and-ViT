@@ -1,5 +1,6 @@
 import os
 import torch
+import torch.nn as nn
 import torchvision
 from torch.utils.data import DataLoader
 from torchvision import transforms
@@ -14,7 +15,6 @@ class BaseTrainer:
                  img_size: int = 32, 
                  manual_seed: int = 42,
                  save_path: str | None = None,
-                 only_see_metrics: bool = False,
                  output_channels: int = 1):
 
         self.epochs = epochs
@@ -93,24 +93,30 @@ class BaseTrainer:
                     os.makedirs(parent, exist_ok=True)
                 self.save_path = save_path
 
-        if os.path.exists(self.save_path):
-            try:
-                self.load_model(self.save_path)
-            except Exception as e:
-                print(f"Warning: failed to load model from {self.save_path}: {e}")
-
-        if only_see_metrics:
-            self.plot_metrics()
-            exit()
 
     def save_model(self):
         torch.save(self.model.state_dict(), self.save_path)
         print(f"Model saved to {self.save_path}")
 
-    def load_model(self, path):
-        self.model.load_state_dict(torch.load(path, map_location=self.device))
-        self.model.to(self.device)
-        print(f"Model loaded from {path}")
+    def load_model(self, path, model: nn.Module):
+        checkpoint = torch.load(path, map_location=self.device)
+        if "model_state_dict" in checkpoint:
+            model.load_state_dict(checkpoint["model_state_dict"])
+            self.train_losses = checkpoint.get("train_losses", [])
+            self.val_losses = checkpoint.get("val_losses", [])
+            self.train_accuracies = checkpoint.get("train_accuracies", [])
+            self.val_accuracies = checkpoint.get("val_accuracies", [])
+            self.start_epoch = checkpoint.get("epoch", 0)
+            print(f"Model loaded from {path}")
+        else:
+            # Fallback for older models saved without additional metadata
+            model.load_state_dict(checkpoint)
+            print(f"Model loaded from {path} (legacy format)")
+
+    def check_only_see_metrics(self, only_see_metrics: bool):
+        if only_see_metrics:
+            self.plot_metrics()
+            exit()
 
     def plot_metrics(self):
         import matplotlib.pyplot as plt

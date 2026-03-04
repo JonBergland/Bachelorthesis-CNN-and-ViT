@@ -22,10 +22,19 @@ class ResnetTrainer(BaseTrainer):
                  manual_seed: int = 42,
                  save_path: str | None = None,
                  only_see_metrics: bool = False):
-        super().__init__(dataset_root, model_name, epochs, lr_rate, batch_size, img_size, manual_seed, save_path, only_see_metrics)
+        super().__init__(dataset_root, model_name, epochs, lr_rate, batch_size, img_size, manual_seed, save_path)
 
         self.model = ResNet9(num_classes=len(self.classes), in_channels=1)
         self.model.to(self.device)
+
+        if os.path.exists(self.save_path):
+            try:
+                self.load_model(self.save_path, self.model)
+            except Exception as e:
+                print(f"Warning: failed to load model from {self.save_path}: {e}")
+
+        self.check_only_see_metrics(only_see_metrics)
+
 
         self.criterion = nn.CrossEntropyLoss(label_smoothing=0.05)
         self.optimizer = optim.Adam(self.model.parameters(), lr=lr_rate, amsgrad=True, weight_decay=1e-3)
