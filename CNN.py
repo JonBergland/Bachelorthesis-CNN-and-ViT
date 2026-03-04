@@ -180,7 +180,7 @@ class CNN():
             self.val_accuracies.append(val_acc)
 
             print(
-                f"Epoch [{epoch+1}/{self.start_epoch + epoch}] "
+                f"Epoch [{epoch+1}/{self.start_epoch + self.epochs}] "
                 f"Loss: {avg_loss:.4f} "
                 f"Train Acc: {train_acc:.2f}% "
                 f"Val Acc: {val_acc:.2f}%"
