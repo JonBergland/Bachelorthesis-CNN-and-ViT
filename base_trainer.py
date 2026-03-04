@@ -80,6 +80,7 @@ class BaseTrainer:
         self.val_losses = []
         self.train_accuracies = []
         self.val_accuracies = []
+        self.start_epoch = 0
 
         if save_path is None:
             self.save_path = os.path.join(os.getcwd(), model_name)
