@@ -11,6 +11,7 @@ from base_trainer import BaseTrainer
 class VisionTransformerTrainer(BaseTrainer):
     def __init__(self, 
                  dataset_root: str, 
+                 model_name: str,
                  epochs: int = 5,
                  lr_rate: float = 0.01,
                  batch_size: int = 32,
@@ -18,7 +19,7 @@ class VisionTransformerTrainer(BaseTrainer):
                  manual_seed: int = 42,
                  save_path: str | None = None,
                  only_see_metrics: bool = False):
-        super().__init__(dataset_root, epochs, lr_rate, batch_size, img_size, manual_seed, save_path, only_see_metrics)
+        super().__init__(dataset_root, model_name, epochs, lr_rate, batch_size, img_size, manual_seed, save_path, only_see_metrics)
 
         self.model = VisionTransformer()
         self.model.to(self.device)

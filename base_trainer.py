@@ -7,13 +7,15 @@ from torchvision import transforms
 class BaseTrainer:
     def __init__(self, 
                  dataset_root: str, 
+                 model_name: str,
                  epochs: int = 5,
                  lr_rate: float = 0.01,
                  batch_size: int = 32,
                  img_size: int = 32, 
                  manual_seed: int = 42,
                  save_path: str | None = None,
-                 only_see_metrics: bool = False):
+                 only_see_metrics: bool = False,
+                 output_channels: int = 1):
 
         self.epochs = epochs
         self.batch_size = batch_size
@@ -22,7 +24,7 @@ class BaseTrainer:
             transforms.Resize((img_size, img_size)),
             # transforms.RandomHorizontalFlip(), # Data augmentations
             # transforms.RandomRotation(10),     # Data augmentation
-            transforms.Grayscale(num_output_channels=1),
+            transforms.Grayscale(num_output_channels=output_channels),
             transforms.ToTensor(),
             transforms.Normalize(mean=[0.449], std=[0.226])
         ])
@@ -80,11 +82,11 @@ class BaseTrainer:
         self.val_accuracies = []
 
         if save_path is None:
-            self.save_path = os.path.join(os.getcwd(), "model.pth")
+            self.save_path = os.path.join(os.getcwd(), model_name)
         else:
             if os.path.isdir(save_path) or str(save_path).endswith(os.sep):
                 os.makedirs(save_path, exist_ok=True)
-                self.save_path = os.path.join(save_path, "model.pth")
+                self.save_path = os.path.join(save_path, model_name)
             else:
                 parent = os.path.dirname(save_path)
                 if parent:
