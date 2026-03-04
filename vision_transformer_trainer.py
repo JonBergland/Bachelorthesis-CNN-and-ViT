@@ -37,6 +37,7 @@ class VisionTransformerTrainer(BaseTrainer):
 
     def train(self):
         best_val_acc = max(self.val_accuracies) if self.val_accuracies else 0.0
+        print("Starting to train")
         for epoch in range(self.epochs):
             self.model.train()
             running_loss = 0.0
@@ -63,7 +64,7 @@ class VisionTransformerTrainer(BaseTrainer):
 
             if val_acc > best_val_acc:
                 best_val_acc = val_acc
-                self.save_model()
+                self.save_model(save_optimizer=True)
                 print(f"New best model saved with Validation Accuracy: {val_acc:.2f}%")
 
             self.train_losses.append(avg_loss)

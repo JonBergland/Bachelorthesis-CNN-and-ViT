@@ -46,6 +46,7 @@ class ResnetTrainer(BaseTrainer):
         use_amp = (self.device_type == "cuda")
         scaler = GradScaler() if use_amp else None
         best_val_acc = max(self.val_accuracies) if self.val_accuracies else 0.0
+        print("Starting to train")
         for epoch in range(self.start_epoch, self.start_epoch + self.epochs):
             running_loss = 0.0
             correct_train = 0
@@ -82,7 +83,7 @@ class ResnetTrainer(BaseTrainer):
 
             if val_acc > best_val_acc:
                 best_val_acc = val_acc
-                self.save_model()
+                self.save_model(save_optimizer=True)
                 print(f"New best model saved with Validation Accuracy: {val_acc:.2f}%")
 
             self.train_losses.append(avg_loss)

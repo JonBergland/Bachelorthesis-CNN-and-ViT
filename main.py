@@ -35,14 +35,14 @@ if __name__ == '__main__':
     BASE_DIR = os.path.dirname(os.path.abspath(__file__))
     root = os.path.join(BASE_DIR, "dataset")
     save_path = os.path.join(BASE_DIR, "saved_models")
-    model_name = "resnet9.pth"
+    model_name = "resnet9_no_data_augmentation.pth"
 
     epochs = 0
     lr_rate = 0.001
     batch_size = 32
     img_size = 128
     manual_seed = 42
-    only_see_metrics = True
+    only_see_metrics = False
     
 
 

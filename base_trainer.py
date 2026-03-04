@@ -95,9 +95,23 @@ class BaseTrainer:
                 self.save_path = save_path
 
 
-    def save_model(self):
-        torch.save(self.model.state_dict(), self.save_path)
-        print(f"Model saved to {self.save_path}")
+    def save_model(self, path: str | None = None, save_optimizer: bool = False):
+        """Save model state (and optional optimizer state) plus class list and training metrics."""
+        path = path or self.save_path
+        data = {
+            "model_state_dict": self.net.state_dict(),
+            "classes": self.classes,
+            "train_losses": self.train_losses,
+            "val_losses": self.val_losses,
+            "train_accuracies": self.train_accuracies,
+            "val_accuracies": self.val_accuracies,
+            "epoch": len(self.train_accuracies)
+        }
+        if save_optimizer:
+            data["optimizer_state_dict"] = self.optimizer.state_dict()
+            data["scheduler_state_dict"] = self.scheduler.state_dict()
+        torch.save(data, path)
+        print(f"Saved model and metrics to: {path}")
 
     def load_model(self, path, model: nn.Module):
         checkpoint = torch.load(path, map_location=self.device)
