@@ -101,3 +101,22 @@ class VisionTransformerTrainer(BaseTrainer):
 
         accuracy = 100 * correct / total
         return accuracy
+    
+    def evaluate(self):
+        correct = 0
+        total = 0
+        with torch.no_grad():
+            for data in self.testloader:
+                images, labels = data
+
+                images = images.to(self.device)
+                labels = labels.to(self.device)
+
+
+                outputs = self.model(images)
+                _, predicted = torch.max(outputs.data, 1)
+                total += labels.size(0)
+                correct += (predicted == labels).sum().item()
+
+        print('Test image accuracy: %d %%' % (
+            100 * correct / total))
