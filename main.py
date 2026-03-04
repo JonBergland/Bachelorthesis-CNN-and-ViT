@@ -1,5 +1,5 @@
 import os
-from CNN import ResnetTrainer
+from resnet_trainer import ResnetTrainer
 
 def main(dataset_root: str, 
          epochs: int = 5,

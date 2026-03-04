@@ -14,6 +14,7 @@ from resnet import ResNet18, ResNet9
 class ResnetTrainer(BaseTrainer):
     def __init__(self, 
                  dataset_root: str, 
+                 model_name: str,
                  epochs: int = 5,
                  lr_rate: float = 0.01,
                  batch_size: int = 32,
@@ -21,13 +22,13 @@ class ResnetTrainer(BaseTrainer):
                  manual_seed: int = 42,
                  save_path: str | None = None,
                  only_see_metrics: bool = False):
-        super().__init__(dataset_root, epochs, lr_rate, batch_size, img_size, manual_seed, save_path, only_see_metrics)
+        super().__init__(dataset_root, model_name, epochs, lr_rate, batch_size, img_size, manual_seed, save_path, only_see_metrics)
 
-        self.net = ResNet9(num_classes=len(self.classes), in_channels=1)
-        self.net.to(self.device)
+        self.model = ResNet9(num_classes=len(self.classes), in_channels=1)
+        self.model.to(self.device)
 
         self.criterion = nn.CrossEntropyLoss(label_smoothing=0.05)
-        self.optimizer = optim.Adam(self.net.parameters(), lr=lr_rate, amsgrad=True, weight_decay=1e-3)
+        self.optimizer = optim.Adam(self.model.parameters(), lr=lr_rate, amsgrad=True, weight_decay=1e-3)
         self.scheduler = torch.optim.lr_scheduler.StepLR(
             self.optimizer, step_size=5, gamma=0.5
         )
@@ -49,13 +50,13 @@ class ResnetTrainer(BaseTrainer):
 
                 if use_amp:
                     with autocast(device_type=self.device_type):
-                        outputs = self.net(inputs)
+                        outputs = self.model(inputs)
                         loss = self.criterion(outputs, labels)
                     scaler.scale(loss).backward()
                     scaler.step(self.optimizer)
                     scaler.update()
                 else:
-                    outputs = self.net(inputs)
+                    outputs = self.model(inputs)
                     loss = self.criterion(outputs, labels)
                     loss.backward()
                     self.optimizer.step()
@@ -87,7 +88,7 @@ class ResnetTrainer(BaseTrainer):
             )
 
     def validate(self):
-        self.net.eval()
+        self.model.eval()
 
         correct = 0
         total = 0
@@ -98,7 +99,7 @@ class ResnetTrainer(BaseTrainer):
                 images = images.to(self.device)
                 labels = labels.to(self.device)
 
-                outputs = self.net(images)
+                outputs = self.model(images)
                 loss = self.criterion(outputs, labels)
                 running_val_loss += loss.item()
 
@@ -107,7 +108,7 @@ class ResnetTrainer(BaseTrainer):
                 correct += (preds == labels).sum().item()
                 total += labels.size(0)
 
-        self.net.train()
+        self.model.train()
 
         avg_val_loss = running_val_loss / len(self.valloader)
         self.val_losses.append(avg_val_loss)
