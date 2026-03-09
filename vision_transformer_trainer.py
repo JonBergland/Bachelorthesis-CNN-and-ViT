@@ -26,7 +26,7 @@ class VisionTransformerTrainer(BaseTrainer):
 
         if os.path.exists(self.save_path):
             try:
-                self.load_model(self.save_path, self.model)
+                self.load_model(self.model, self.save_path)
             except Exception as e:
                 print(f"Warning: failed to load model from {self.save_path}: {e}")
 

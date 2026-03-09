@@ -24,7 +24,7 @@ def main(dataset_root: str,
     cnn.train()
     cnn.evaluate()
 
-    cnn.save_model(save_optimizer=True)
+    cnn.save_model(model=cnn.model, save_optimizer=True)
     cnn.clear_model()
 
     cnn.plot_metrics()
