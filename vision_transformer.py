@@ -15,24 +15,28 @@ class PatchEmbedding(nn.Module):
 class PositionalEncoding(nn.Module):
     def __init__(self, embed_dim, seq_len):
         super().__init__()
-        self.pos_embed = nn.Parameter(torch.randn(1, seq_len + 1, embed_dim))  
+        self.pos_embed = nn.Parameter(torch.zeros(1, seq_len + 1, embed_dim))  
 
     def forward(self, x):
         return x + self.pos_embed
     
 
 class MultiHeadAttention(nn.Module):
-    def __init__(self, embed_dim, num_heads):
+    def __init__(self, embed_dim, num_heads, dropout=0.1):
         super().__init__()
-        self.attn = nn.MultiheadAttention(embed_dim, num_heads)
+        self.attn = nn.MultiheadAttention(
+            embed_dim, 
+            num_heads, 
+            dropout,
+            batch_first=True)
 
     def forward(self, x):
         return self.attn(x, x, x)[0]
 
 class TransformerEncoderBlock(nn.Module):
-    def __init__(self, embed_dim, num_heads, mlp_dim):
+    def __init__(self, embed_dim, num_heads, mlp_dim, dropout=0.1):
         super().__init__()
-        self.attn = MultiHeadAttention(embed_dim, num_heads)
+        self.attn = MultiHeadAttention(embed_dim, num_heads, dropout=dropout)
         self.mlp = nn.Sequential(
             nn.Linear(embed_dim, mlp_dim),
             nn.ReLU(),
@@ -55,16 +59,20 @@ class VisionTransformer(nn.Module):
                  num_heads=8, 
                  depth=6, 
                  mlp_dim=1024,
-                 in_channels=1):
+                 in_channels=1,
+                 dropout=0.1):
         super().__init__()
         self.patch_embedding = PatchEmbedding(img_size, patch_size, in_channels, embed_dim)
+
+        self.cls_token = nn.Parameter(torch.zeros(1, 1, embed_dim))
+        nn.init.trunc_normal_(self.cls_token, std=0.02)
 
         seq_len = (img_size // patch_size) ** 2
         self.pos_encoding = PositionalEncoding(embed_dim, seq_len)
         self.transformer_blocks = nn.ModuleList([
-            TransformerEncoderBlock(embed_dim, num_heads, mlp_dim) for _ in range(depth)
+            TransformerEncoderBlock(embed_dim, num_heads, mlp_dim, dropout=dropout) for _ in range(depth)
         ])
-        self.cls_token = nn.Parameter(torch.randn(1, 1, embed_dim))
+
         self.mlp_head = nn.Linear(embed_dim, num_classes)
 
     def forward(self, x):

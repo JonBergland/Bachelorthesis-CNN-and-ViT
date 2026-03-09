@@ -21,11 +21,27 @@ class VisionTransformerTrainer(BaseTrainer):
                  only_see_metrics: bool = False):
         super().__init__(dataset_root, model_name, epochs, lr_rate, batch_size, img_size, manual_seed, save_path)
 
-        self.model = VisionTransformer(img_size=img_size)
+        self.model = VisionTransformer(
+            img_size=img_size,
+            patch_size=16,
+            num_classes=len(self.classes),
+            embed_dim=256,
+            num_heads=8,
+            depth=6,
+            mlp_dim=512,
+            in_channels=1,
+            dropout=0.1
+        )
         self.model.to(self.device)
 
         self.criterion = nn.CrossEntropyLoss()
         self.optimizer = optim.Adam(self.model.parameters(), lr=lr_rate)
+
+        self.scheduler = optim.lr_scheduler.CosineAnnealingLR(
+            self.optimizer,
+            T_max=max(1, epochs),
+            eta_min=lr_rate * 0.1
+        )
 
         if os.path.exists(self.save_path):
             try:
@@ -38,6 +54,7 @@ class VisionTransformerTrainer(BaseTrainer):
     def train(self):
         best_val_acc = max(self.val_accuracies) if self.val_accuracies else 0.0
         print("Starting to train")
+
         for epoch in range(self.start_epoch, self.start_epoch + self.epochs):
             self.model.train()
             running_loss = 0.0
@@ -47,16 +64,21 @@ class VisionTransformerTrainer(BaseTrainer):
             for inputs, labels in self.trainloader:
                 inputs, labels = inputs.to(self.device), labels.to(self.device)
 
-                self.optimizer.zero_grad()
+                self.optimizer.zero_grad(set_to_none=True)
                 outputs = self.model(inputs)
                 loss = self.criterion(outputs, labels)
                 loss.backward()
+
+                torch.nn.utils.clip_grad_norm_(self.model.parameters(), max_norm=1.0)
+
                 self.optimizer.step()
 
                 running_loss += loss.item()
                 _, preds = torch.max(outputs, 1)
                 correct_train += (preds == labels).sum().item()
                 total_train += labels.size(0)
+
+            self.scheduler.step()
 
             avg_loss = running_loss / len(self.trainloader)
             train_acc = 100 * correct_train / total_train
@@ -72,7 +94,7 @@ class VisionTransformerTrainer(BaseTrainer):
             self.val_accuracies.append(val_acc)
 
             print(
-                f"Epoch [{epoch+1}/{self.epochs}] "
+                f"Epoch [{epoch+1}/{self.start_epoch + self.epochs}] "
                 f"Loss: {avg_loss:.4f} "
                 f"Train Acc: {train_acc:.2f}% "
                 f"Val Acc: {val_acc:.2f}%"
