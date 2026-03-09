@@ -1,5 +1,6 @@
 import os
 from resnet_trainer import ResnetTrainer
+from vision_transformer_trainer import VisionTransformerTrainer
 
 def main(dataset_root: str,
          model_name: str, 
@@ -11,7 +12,27 @@ def main(dataset_root: str,
          save_path: str | None = None,
          only_see_metrics: bool = False):
 
-    cnn = ResnetTrainer(dataset_root=dataset_root, 
+    # cnn = ResnetTrainer(dataset_root=dataset_root, 
+    #                     model_name=model_name,
+    #                     epochs = epochs,
+    #                     lr_rate = lr_rate,
+    #                     batch_size = batch_size,
+    #                     img_size = img_size,
+    #                     manual_seed = manual_seed,
+    #                     save_path=save_path,
+    #                     only_see_metrics=only_see_metrics)
+
+    
+
+    # cnn.train()
+    # cnn.evaluate()
+
+    # cnn.save_model(model=cnn.model, save_optimizer=True)
+    # cnn.clear_model()
+
+    # cnn.plot_metrics()
+
+    vit = VisionTransformerTrainer(dataset_root=dataset_root, 
                         model_name=model_name,
                         epochs = epochs,
                         lr_rate = lr_rate,
@@ -20,22 +41,22 @@ def main(dataset_root: str,
                         manual_seed = manual_seed,
                         save_path=save_path,
                         only_see_metrics=only_see_metrics)
+    
+    
+    vit.train()
+    vit.evaluate()
 
-    cnn.train()
-    cnn.evaluate()
+    vit.save_model(model=vit.model, save_optimizer=True)
+    vit.clear_model()
 
-    cnn.save_model(model=cnn.model, save_optimizer=True)
-    cnn.clear_model()
-
-    cnn.plot_metrics()
-
+    vit.plot_metrics()
 
     
 if __name__ == '__main__':
     BASE_DIR = os.path.dirname(os.path.abspath(__file__))
     root = os.path.join(BASE_DIR, "dataset")
     save_path = os.path.join(BASE_DIR, "saved_models")
-    model_name = "resnet9_no_data_augmentation.pth"
+    model_name = "vit_no_data_augmentation.pth"
 
     epochs = 0
     lr_rate = 0.001
