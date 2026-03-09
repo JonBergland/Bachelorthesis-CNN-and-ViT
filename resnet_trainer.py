@@ -83,7 +83,7 @@ class ResnetTrainer(BaseTrainer):
 
             if val_acc > best_val_acc:
                 best_val_acc = val_acc
-                self.save_model(save_optimizer=True)
+                self.save_model(model=self.model, save_optimizer=True)
                 print(f"New best model saved with Validation Accuracy: {val_acc:.2f}%")
 
             self.train_losses.append(avg_loss)
