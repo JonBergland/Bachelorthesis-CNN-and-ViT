@@ -145,3 +145,8 @@ class ResnetTrainer(BaseTrainer):
         print('Test image accuracy: %d %%' % (
             100 * correct / total))
 
+
+    def clear_model(self):
+        self.model = None
+        if self.device_type == "cuda":
+            torch.cuda.empty_cache()
