@@ -21,7 +21,7 @@ class VisionTransformerTrainer(BaseTrainer):
                  only_see_metrics: bool = False):
         super().__init__(dataset_root, model_name, epochs, lr_rate, batch_size, img_size, manual_seed, save_path)
 
-        self.model = VisionTransformer()
+        self.model = VisionTransformer(img_size=img_size)
         self.model.to(self.device)
 
         if os.path.exists(self.save_path):

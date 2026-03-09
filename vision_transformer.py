@@ -58,7 +58,9 @@ class VisionTransformer(nn.Module):
                  in_channels=1):
         super().__init__()
         self.patch_embedding = PatchEmbedding(img_size, patch_size, in_channels, embed_dim)
-        self.pos_encoding = PositionalEncoding(embed_dim, (img_size // patch_size) ** 2)
+
+        seq_len = (img_size // patch_size) ** 2
+        self.pos_encoding = PositionalEncoding(embed_dim, seq_len)
         self.transformer_blocks = nn.ModuleList([
             TransformerEncoderBlock(embed_dim, num_heads, mlp_dim) for _ in range(depth)
         ])
