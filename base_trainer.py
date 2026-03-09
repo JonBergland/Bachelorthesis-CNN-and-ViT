@@ -118,16 +118,32 @@ class BaseTrainer:
 
     def load_model(self, model: nn.Module, path):
         checkpoint = torch.load(path, map_location=self.device)
+
         if "model_state_dict" in checkpoint:
             model.load_state_dict(checkpoint["model_state_dict"])
+
+            if (
+                hasattr(self, "optimizer")
+                and self.optimizer is not None
+                and "optimizer_state_dict" in checkpoint
+            ):
+                self.optimizer.load_state_dict(checkpoint["optimizer_state_dict"])
+
+            if (
+                hasattr(self, "scheduler")
+                and self.scheduler is not None
+                and "scheduler_state_dict" in checkpoint
+            ):
+                self.scheduler.load_state_dict(checkpoint["scheduler_state_dict"])
+
             self.train_losses = checkpoint.get("train_losses", [])
             self.val_losses = checkpoint.get("val_losses", [])
             self.train_accuracies = checkpoint.get("train_accuracies", [])
             self.val_accuracies = checkpoint.get("val_accuracies", [])
             self.start_epoch = checkpoint.get("epoch", 0)
+
             print(f"Model loaded from {path}")
         else:
-            # Fallback for older models saved without additional metadata
             model.load_state_dict(checkpoint)
             print(f"Model loaded from {path} (legacy format)")
 

@@ -27,6 +27,13 @@ class ResnetTrainer(BaseTrainer):
         self.model = ResNet9(num_classes=len(self.classes), in_channels=1)
         self.model.to(self.device)
 
+        self.criterion = nn.CrossEntropyLoss(label_smoothing=0.05)
+        self.optimizer = optim.Adam(self.model.parameters(), lr=lr_rate, amsgrad=True, weight_decay=1e-3)
+        self.scheduler = torch.optim.lr_scheduler.StepLR(
+            self.optimizer, step_size=5, gamma=0.5
+        )
+
+
         if os.path.exists(self.save_path):
             try:
                 self.load_model(self.model, self.save_path)
@@ -34,13 +41,6 @@ class ResnetTrainer(BaseTrainer):
                 print(f"Warning: failed to load model from {self.save_path}: {e}")
 
         self.check_only_see_metrics(only_see_metrics)
-
-
-        self.criterion = nn.CrossEntropyLoss(label_smoothing=0.05)
-        self.optimizer = optim.Adam(self.model.parameters(), lr=lr_rate, amsgrad=True, weight_decay=1e-3)
-        self.scheduler = torch.optim.lr_scheduler.StepLR(
-            self.optimizer, step_size=5, gamma=0.5
-        )
 
     def train(self):
         use_amp = (self.device_type == "cuda")

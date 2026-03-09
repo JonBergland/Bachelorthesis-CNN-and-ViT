@@ -24,6 +24,9 @@ class VisionTransformerTrainer(BaseTrainer):
         self.model = VisionTransformer(img_size=img_size)
         self.model.to(self.device)
 
+        self.criterion = nn.CrossEntropyLoss()
+        self.optimizer = optim.Adam(self.model.parameters(), lr=lr_rate)
+
         if os.path.exists(self.save_path):
             try:
                 self.load_model(self.model, self.save_path)
@@ -32,13 +35,10 @@ class VisionTransformerTrainer(BaseTrainer):
 
         self.check_only_see_metrics(only_see_metrics)
 
-        self.criterion = nn.CrossEntropyLoss()
-        self.optimizer = optim.Adam(self.model.parameters(), lr=lr_rate)
-
     def train(self):
         best_val_acc = max(self.val_accuracies) if self.val_accuracies else 0.0
         print("Starting to train")
-        for epoch in range(self.epochs):
+        for epoch in range(self.start_epoch, self.start_epoch + self.epochs):
             self.model.train()
             running_loss = 0.0
             correct_train = 0
