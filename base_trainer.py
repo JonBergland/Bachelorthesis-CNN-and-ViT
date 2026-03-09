@@ -19,6 +19,8 @@ class BaseTrainer:
 
         self.epochs = epochs
         self.batch_size = batch_size
+        self.device_type = "cuda" if torch.cuda.is_available() else "cpu"
+        self.device = torch.device(self.device_type)
 
         transform = transforms.Compose([
             transforms.Resize((img_size, img_size)),
@@ -44,12 +46,14 @@ class BaseTrainer:
             generator=self.generator
         )
 
+        use_pin_memory = self.device_type == "cuda"
+
         self.trainloader = DataLoader(
             trainset, 
             batch_size=batch_size,  
             shuffle=True, 
             num_workers=1,
-            pin_memory=True,
+            pin_memory=use_pin_memory,
             persistent_workers=True
         )
 
@@ -58,7 +62,7 @@ class BaseTrainer:
             batch_size=batch_size,  
             shuffle=True, 
             num_workers=1,
-            pin_memory=True,
+            pin_memory=use_pin_memory,
             persistent_workers=True
         )
 
@@ -67,14 +71,11 @@ class BaseTrainer:
             batch_size=batch_size,  
             shuffle=True, 
             num_workers=1,
-            pin_memory=True,
+            pin_memory=use_pin_memory,
             persistent_workers=True
         )
 
         self.classes = self.dataset.classes
-
-        self.device_type = "cuda" if torch.cuda.is_available() else "cpu"
-        self.device = torch.device(self.device_type)
 
         self.train_losses = []
         self.val_losses = []
@@ -108,8 +109,10 @@ class BaseTrainer:
             "epoch": len(self.train_accuracies)
         }
         if save_optimizer:
-            data["optimizer_state_dict"] = self.optimizer.state_dict()
-            data["scheduler_state_dict"] = self.scheduler.state_dict()
+            if hasattr(self, "optimizer") and self.optimizer is not None:
+                data["optimizer_state_dict"] = self.optimizer.state_dict()
+            if hasattr(self, "scheduler") and self.scheduler is not None:
+                data["scheduler_state_dict"] = self.scheduler.state_dict()
         torch.save(data, path)
         print(f"Saved model and metrics to: {path}")
 
