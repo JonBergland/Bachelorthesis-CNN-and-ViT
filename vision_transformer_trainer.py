@@ -23,24 +23,22 @@ class VisionTransformerTrainer(BaseTrainer):
 
         self.model = VisionTransformer(
             img_size=img_size,
-            patch_size=16,
+            patch_size=8,
             num_classes=len(self.classes),
-            embed_dim=256,
-            num_heads=8,
+            embed_dim=288,
+            num_heads=6,
             depth=6,
-            mlp_dim=512,
+            mlp_dim=864,
             in_channels=1,
-            dropout=0.1
+            dropout=0.6
         )
         self.model.to(self.device)
 
-        self.criterion = nn.CrossEntropyLoss()
-        self.optimizer = optim.Adam(self.model.parameters(), lr=lr_rate)
+        self.criterion = nn.CrossEntropyLoss(label_smoothing=0.05)
+        self.optimizer = optim.Adam(self.model.parameters(), lr=lr_rate, amsgrad=True, weight_decay=2e-3)
 
-        self.scheduler = optim.lr_scheduler.CosineAnnealingLR(
-            self.optimizer,
-            T_max=max(1, epochs),
-            eta_min=lr_rate * 0.1
+        self.scheduler = torch.optim.lr_scheduler.StepLR(
+            self.optimizer, step_size=5, gamma=0.5
         )
 
         if os.path.exists(self.save_path):
