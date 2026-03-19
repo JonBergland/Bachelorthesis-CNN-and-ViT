@@ -28,11 +28,10 @@ class ResnetTrainer(BaseTrainer):
         self.model.to(self.device)
 
         self.criterion = nn.CrossEntropyLoss(label_smoothing=0.05)
-        self.optimizer = optim.Adam(self.model.parameters(), lr=lr_rate, amsgrad=True, weight_decay=1e-3)
+        self.optimizer = optim.Adam(self.model.parameters(), lr=lr_rate, amsgrad=True, weight_decay=2e-3)
         self.scheduler = torch.optim.lr_scheduler.StepLR(
             self.optimizer, step_size=5, gamma=0.5
         )
-
 
         if os.path.exists(self.save_path):
             try:
