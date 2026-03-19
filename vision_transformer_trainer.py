@@ -40,7 +40,7 @@ class VisionTransformerTrainer(BaseTrainer):
         self.model.to(self.device)
 
         self.criterion = nn.CrossEntropyLoss(label_smoothing=label_smoothing)
-        self.optimizer = optim.Adam(self.model.parameters(), lr=lr_rate, amsgrad=True, weight_decay=weight_decay)
+        self.optimizer = optim.AdamW(self.model.parameters(), lr=lr_rate, amsgrad=True, weight_decay=weight_decay)
 
         self.scheduler = torch.optim.lr_scheduler.StepLR(
             self.optimizer, step_size=lr_step_size, gamma=lr_gamma
