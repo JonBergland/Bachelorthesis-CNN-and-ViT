@@ -18,7 +18,12 @@ class VisionTransformerTrainer(BaseTrainer):
                  img_size: int = 32, 
                  manual_seed: int = 42,
                  save_path: str | None = None,
-                 only_see_metrics: bool = False):
+                 only_see_metrics: bool = False,
+                 dropout_rate: float = 0.6,
+                 label_smoothing: float = 0.05,
+                 weight_decay: float = 2e-3,
+                 lr_step_size: int = 5,
+                 lr_gamma: float = 0.5):
         super().__init__(dataset_root, model_name, epochs, lr_rate, batch_size, img_size, manual_seed, save_path)
 
         self.model = VisionTransformer(
@@ -30,15 +35,15 @@ class VisionTransformerTrainer(BaseTrainer):
             depth=6,
             mlp_dim=864,
             in_channels=1,
-            dropout=0.6
+            dropout=dropout_rate
         )
         self.model.to(self.device)
 
-        self.criterion = nn.CrossEntropyLoss(label_smoothing=0.05)
-        self.optimizer = optim.Adam(self.model.parameters(), lr=lr_rate, amsgrad=True, weight_decay=2e-3)
+        self.criterion = nn.CrossEntropyLoss(label_smoothing=label_smoothing)
+        self.optimizer = optim.Adam(self.model.parameters(), lr=lr_rate, amsgrad=True, weight_decay=weight_decay)
 
         self.scheduler = torch.optim.lr_scheduler.StepLR(
-            self.optimizer, step_size=5, gamma=0.5
+            self.optimizer, step_size=lr_step_size, gamma=lr_gamma
         )
 
         if os.path.exists(self.save_path):

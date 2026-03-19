@@ -34,7 +34,7 @@ class BasicBlock(nn.Module):
         return out
     
 class ResNet18(nn.Module):
-    def __init__(self, num_classes=10, in_channels=3):
+    def __init__(self, num_classes=10, in_channels=3, dropout_rate=0.5):
         super(ResNet18, self).__init__()
         self.conv1 = nn.Conv2d(in_channels, 64, kernel_size=3, stride=1, padding=1, bias=False)
         self.bn1 = nn.BatchNorm2d(64)
@@ -47,7 +47,7 @@ class ResNet18(nn.Module):
         self.layer4 = self._make_layer(BasicBlock, 512, 2, stride=2)
         
         self.avgpool = nn.AdaptiveAvgPool2d((1, 1))
-        self.dropout = nn.Dropout(0.5)
+        self.dropout = nn.Dropout(dropout_rate)
         self.fc = nn.Linear(512, num_classes)
 
     def _make_layer(self, block, out_channels, num_blocks, stride):
@@ -75,7 +75,7 @@ class ResNet18(nn.Module):
         return out
 
 class ResNet9(nn.Module):
-    def __init__(self, num_classes=10, in_channels=1):
+    def __init__(self, num_classes=10, in_channels=1, dropout_rate=0.6):
         super(ResNet9, self).__init__()
         self.conv1 = nn.Conv2d(in_channels, 64, kernel_size=3, stride=1, padding=1, bias=False)
         self.bn1 = nn.BatchNorm2d(64)
@@ -88,7 +88,7 @@ class ResNet9(nn.Module):
         self.layer4 = self._make_layer(BasicBlock, 512, 1, stride=2)
         
         self.avgpool = nn.AdaptiveAvgPool2d((1, 1))
-        self.dropout = nn.Dropout(0.6)
+        self.dropout = nn.Dropout(dropout_rate)
         self.fc = nn.Linear(512, num_classes)
 
     def _make_layer(self, block, out_channels, num_blocks, stride):
